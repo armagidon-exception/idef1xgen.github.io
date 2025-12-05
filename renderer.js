@@ -1,4 +1,4 @@
-import { toPx, div, span } from "/utils.js";
+import { toPx, div, span } from "utils.js";
 const WEAK_ENTITY_CLASS = "weak-entity";
 const STRONG_ENTITY_CLASS = "strong-entity";
 const ENTITY_NAME_CLASS = "entity-name";
