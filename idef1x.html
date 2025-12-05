@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IDEF1X Diagram Generator</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-project-diagram"></i> IDEF1X Diagram Generator</h1>
+        <p>
+          Создавайте инфологические модели в нотации IDEF1X с простым текстовым
+          синтаксисом
+        </p>
+      </header>
+
+      <div class="main-content">
+        <div class="input-section">
+          <div class="section-title">
+            <h3><i class="fas fa-code"></i> Разметка диаграммы</h3>
+            <button class="btn btn-secondary" onclick="loadExample()">
+              <i class="fas fa-file-code"></i> Пример
+            </button>
+          </div>
+
+          <div class="code-editor">
+            <textarea
+              id="markup"
+              placeholder="Введите разметку диаграммы здесь..."
+            >
+# IDEF1X Диаграмма - Университет
+
+# Сущности
+[Студент]
+ID: PK
+Имя: string
+Фамилия: string
+Дата_рождения: date
+Группа_ID: FK -> Группа.ID
+
+[Группа]
+ID: PK
+Название: string
+Год_поступления: number
+
+[Преподаватель]
+ID: PK
+Имя: string
+Фамилия: string
+Ученая_степень: string
+
+[Предмет]
+Код: PK
+Название: string
+Часы: number
+Преподаватель_ID: FK -> Преподаватель.ID
+
+[Оценка]
+ID: PK
+Студент_ID: FK -> Студент.ID
+Предмет_Код: FK -> Предмет.Код
+Оценка: number (O)
+Дата: date
+
+# Связи
+Студент.Группа_ID -- Группа.ID
+Оценка.Студент_ID -- Студент.ID
+Оценка.Предмет_Код -- Предмет.Код
+
+# Генерализации
+Преподаватель (обобщение) {
+  Доцент
+  Профессор
+  Ассистент
+} : полная, дискриминатор=Должность
+  </textarea
+            >
+          </div>
+
+          <div class="controls">
+            <button class="btn btn-primary" id="generate-btn">
+              <i class="fas fa-magic"></i> Сгенерировать диаграмму
+            </button>
+            <button class="btn btn-secondary" id="auto-layout-btn">
+              <i class="fas fa-th"></i> Авторазмещение
+            </button>
+          </div>
+
+          <div id="status" class="status"></div>
+
+          <div class="syntax-guide">
+            <h4><i class="fas fa-info-circle"></i> Синтаксис разметки</h4>
+            <pre class="syntax-example">
+# Комментарии начинаются с # 
+# Сущности (квадратные скобки)
+[Имя_сущности] 
+Атрибут1: тип : PK
+Атрибут2: тип : FK -> Целевая.Атрибут 
+Атрибут3: тип (O) 
+# Связи Сущность1.Атрибут -- Сущность2.Атрибут 
+# Генерализации 
+Родитель (обобщение) { 
+    Потомок1
+    Потомок2 
+} : тип, дискриминатор=Имя
+            </pre>
+          </div>
+        </div>
+
+        <div class="output-section">
+          <div class="section-title">
+            <h3><i class="fas fa-eye"></i> Визуализация</h3>
+            <div class="legend">
+              <div class="legend-item">
+                <div class="legend-color" style="background: black"></div>
+                <span>Сильная сущность</span>
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-color"
+                  style="background: black; border-radius: 5px"
+                ></div>
+                <span>Слабая сущность</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="diagram-container" id="diagram-container">
+            <div id="diagram-area"></div>
+            <svg
+              id="connections"
+              style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3000px;
+                height: 3000px;
+                pointer-events: none;
+                transform-origin: 0 0;
+              "
+            ></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomOut()">-</button>
+        <button class="zoom-btn" onclick="resetZoom()">100%</button>
+        <button class="zoom-btn" onclick="zoomIn()">+</button>
+        <div class="zoom-level" id="zoom-level">100%</div>
+      </div>
+    </div>
+  </body>
+</html>
