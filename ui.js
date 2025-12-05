@@ -1,6 +1,6 @@
-import { showStatus } from "utils.js";
-import { parseMarkup } from "parser.js";
-import { renderDiagram, redrawConnections } from "renderer.js";
+import { showStatus } from "./utils.js";
+import { parseMarkup } from "./parser.js";
+import { renderDiagram, redrawConnections } from "./renderer.js";
 
 let currentDiagram = {};
 
