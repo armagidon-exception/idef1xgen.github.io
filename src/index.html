@@ -66,13 +66,13 @@
     +ISBN: string
     title: string
     ?year: number
-    category_id: number FK -> Category.id
+    category_id: number FK -&gt; Category.id
   }
 
 АТРИБУТЫ
 --------
 Формат атрибута:
-  [*]?[+?]?имя : тип [FK -> ВнешняяСущность.внешнийАтрибут [: "имяСвязи"]]
+  [*]?[+?]?имя : тип [FK -&gt; ВнешняяСущность.внешнийАтрибут [: "имяСвязи"]]
 
 Префиксы:
   +   - первичный ключ (обязательный)
@@ -91,16 +91,16 @@
   ?name: string                   // опциональный атрибут
   *?phone: string                 // единичный опциональный
   *email: string                  // единичный обязательный
-  category_id: number FK -> Category.id  // внешний ключ
-  author_id: number FK -> Author.id : "написал"  // с именем связи
+  category_id: number FK -&gt; Category.id  // внешний ключ
+  author_id: number FK -&gt; Author.id : "написал"  // с именем связи
 
 ОТНОШЕНИЯ (Relationship)
 ------------------------
 Отношение можно определить отдельно, если не указано в атрибуте:
-  Relationship Сущность1.атрибут1 -> Сущность2.атрибут2 [: "имяСвязи"]
+  Relationship Сущность1.атрибут1 -&gt; Сущность2.атрибут2 [: "имяСвязи"]
 
 Пример:
-  Relationship Book.author_id -> Author.id : "написал"
+  Relationship Book.author_id -&gt; Author.id : "написал"
 
 ОБОБЩЕНИЯ (Generalization)
 --------------------------
@@ -133,7 +133,7 @@ Entity Book {
   +ISBN: string
   title: string
   ?year: number
-  category_id: number FK -> Category.id
+  category_id: number FK -&gt; Category.id
 }
 
 Entity Author {
@@ -142,7 +142,7 @@ Entity Author {
   *?phone: string
 }
 
-Relationship Book.author_id -> Author.id : "написал"
+Relationship Book.author_id -&gt; Author.id : "написал"
 
 Generalization Person {
   Student
