@@ -197,49 +197,15 @@ textarea:focus {
 }
 
 /* IDEF1X Стандарт для сущностей - ИСПРАВЛЕНО */
-.strong-entity {
-  border: 2px solid black;
-  border-radius: 0;
-  background: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+/* Styles moved to SVG attributes */
 
-.weak-entity {
-  border: 2px solid black;
-  border-radius: 10px;
-  background: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+/* .entity-name styles moved to SVG attributes */
 
-.entity-name {
-  text-align: left;
-  font-weight: bold;
-  color: black;
-  font-size: 14px;
-  margin-bottom: 5px;
-  position: absolute;
-  top: -25px;
-  left: 0;
-  right: 0;
-  white-space: nowrap;
-}
+/* .entity-box styles moved to SVG attributes */
 
-.entity-box {
-  overflow: hidden;
-}
+/* .separator styles moved to SVG attributes */
 
-.separator {
-  height: 2px;
-  background: black;
-  width: 100%;
-}
-
-.pk-section {
-  min-height: 30px;
-  display: grid;
-  align-items: center;
-  padding: 0px 5px;
-}
+/* .pk-section styles moved to SVG attributes */
 
 .attributes-section {
   min-height: 30px;
@@ -364,29 +330,12 @@ textarea:focus {
   display: block;
 }
 
-.relationship-line {
-  stroke: black;
-  stroke-width: 1.5;
-  fill: none;
-}
+/* .relationship-line styles moved to SVG attributes */
+/* .identifying-line styles moved to SVG attributes */
+/* .non-identifying-line styles moved to SVG attributes */
 
-.identifying-line {
-  stroke-dasharray: none;
-}
-
-.non-identifying-line {
-  stroke-dasharray: 5, 3;
-}
-
-.cardinality-dot {
-  fill: black;
-}
-
-.generalization-circle {
-  fill: white;
-  stroke: black;
-  stroke-width: 2;
-}
+/* .cardinality-dot styles moved to SVG attributes */
+/* .generalization-circle styles moved to SVG attributes */
 
 .relationship-label {
   font-size: 11px;
@@ -404,7 +353,7 @@ textarea:focus {
 
 .dragging {
   opacity: 0.9;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
 }
 
 .zoom-controls {
@@ -443,47 +392,15 @@ textarea:focus {
   color: #666;
 }
 
-.diamond {
-  fill: white;
-  stroke: black;
-  stroke-width: 1.5;
-}
+/* .diamond styles moved to SVG attributes */
+/* .arrow styles moved to SVG attributes */
+/* .generalization-circle styles moved to SVG attributes */
+/* .generalization-underline styles moved to SVG attributes */
+/* .generalization-discriminator styles moved to SVG attributes */
+/* .generalization-line styles moved to SVG attributes */
+/* .generalization-cap styles moved to SVG attributes */
 
-.arrow {
-  fill: black;
-}
-
-.generalization-circle {
-  fill: white;
-  stroke: black;
-  stroke-width: 2;
-}
-.generalization-underline {
-  stroke: black;
-  stroke-width: 2;
-}
-.generalization-discriminator {
-  fill: black;
-  font-family: sans-serif;
-}
-.generalization-line {
-  stroke: black;
-  stroke-width: 2;
-  fill: none;
-  stroke-linecap: round;
-}
-.generalization-cap {
-  fill: black;
-}
-
-.nonidentifying-optional {
-  transform-box: fill-box;
-  fill: white;
-  stroke: black;
-  stroke-width: 1px;
-  transform: translate(-50%, -50%) rotate(45deg);
-  transform-origin: center;
-}
+/* .nonidentifying-optional styles moved to SVG attributes */
 
 #exportSVG {
     max-width: max-content;

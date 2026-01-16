@@ -171,7 +171,18 @@ Generalization Person {
           </div>
 
           <div class="diagram-container" id="diagram-container">
-            <div id="diagram-objects"></div>
+            <svg
+              id="diagram-objects"
+              style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3000px;
+                height: 3000px;
+                pointer-events: auto;
+                transform-origin: 0 0;
+              "
+            ></svg>
             <svg
               id="connections"
               style="

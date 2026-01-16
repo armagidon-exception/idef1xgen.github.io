@@ -1,7 +1,7 @@
 import { showStatus } from "./utils";
 import { parseMarkup, ParseResult } from "./parser";
 import { renderDiagram, redrawConnections } from "./renderer";
-import { toSvg } from "html-to-image";
+
 import { Entity } from "./types";
 import download from "downloadjs";
 import "./style.css";
@@ -78,7 +78,7 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 let currentEntity: Entity = null;
-function makeDraggable(element: HTMLElement, entity: Entity) {
+function makeDraggable(element: Element, entity: Entity) {
   element.addEventListener("mousedown", startDrag);
 
   function startDrag(e: MouseEvent) {
@@ -95,6 +95,14 @@ function makeDraggable(element: HTMLElement, entity: Entity) {
     dragOffset.y = e.clientY - rect.top;
 
     element.classList.add("dragging");
+    // Highlight the entity rectangle for dragging feedback
+    const svgRect = element.querySelector("rect");
+    if (svgRect) {
+      svgRect.setAttribute("original-stroke", svgRect.getAttribute("stroke") || "black");
+      svgRect.setAttribute("original-stroke-width", svgRect.getAttribute("stroke-width") || "2");
+      svgRect.setAttribute("stroke", "#667eea");
+      svgRect.setAttribute("stroke-width", "3");
+    }
 
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
@@ -109,17 +117,17 @@ function makeDraggable(element: HTMLElement, entity: Entity) {
     let newX = e.clientX - dragOffset.x - diagramRect.left;
     let newY = e.clientY - dragOffset.y - diagramRect.top;
 
-    newX = Math.max(
-      0,
-      Math.min(newX, diagramArea.offsetWidth - element.offsetWidth),
-    );
-    newY = Math.max(
-      0,
-      Math.min(newY, diagramArea.offsetHeight - element.offsetHeight),
-    );
+    const rect = element.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const diagramWidth = diagramArea.clientWidth;
+    const diagramHeight = diagramArea.clientHeight;
 
-    element.style.left = `${newX}px`;
-    element.style.top = `${newY}px`;
+    newX = Math.max(0, Math.min(newX, diagramWidth - width));
+    newY = Math.max(0, Math.min(newY, diagramHeight - height));
+
+    // Update SVG transform
+    element.setAttribute("transform", `translate(${newX}, ${newY})`);
 
     currentEntity.x = newX;
     currentEntity.y = newY;
@@ -131,6 +139,21 @@ function makeDraggable(element: HTMLElement, entity: Entity) {
     if (!isDragging) return;
 
     element.classList.remove("dragging");
+    // Restore original rectangle appearance
+    const svgRect = element.querySelector("rect");
+    if (svgRect) {
+      const originalStroke = svgRect.getAttribute("original-stroke");
+      const originalStrokeWidth = svgRect.getAttribute("original-stroke-width");
+      if (originalStroke) {
+        svgRect.setAttribute("stroke", originalStroke);
+        svgRect.removeAttribute("original-stroke");
+      }
+      if (originalStrokeWidth) {
+        svgRect.setAttribute("stroke-width", originalStrokeWidth);
+        svgRect.removeAttribute("original-stroke-width");
+      }
+    }
+    
     isDragging = false;
     currentEntity = null;
 
@@ -173,8 +196,7 @@ window.autoLayout = function () {
     entity.y = y;
 
     if (entity.div) {
-      entity.div.style.left = `${x}px`;
-      entity.div.style.top = `${y}px`;
+      entity.div.setAttribute("transform", `translate(${x}, ${y})`);
     }
   });
 
@@ -218,96 +240,67 @@ Generalization Person {
   showStatus('Пример загружен. Нажмите "Сгенерировать диаграмму"', "success");
 };
 
-function svgFromDataUrl(dataUrl: string): SVGSVGElement & HTMLElement {
-  const encoded = dataUrl.split(",")[1];
 
-  const decoded = decodeURIComponent(encoded);
-
-  const doc = new DOMParser().parseFromString(decoded, "image/svg+xml");
-
-  return doc.documentElement as HTMLElement & SVGSVGElement;
-}
-
-function mergeSVGsVertical(
-  svg1: SVGSVGElement,
-  svg2: SVGSVGElement,
-): SVGSVGElement {
-  const clone1 = svg1.cloneNode(true) as SVGSVGElement;
-  const clone2 = svg2.cloneNode(true) as SVGSVGElement;
-
-  const w1 = parseFloat(clone1.getAttribute("width") || "0");
-  const h1 = parseFloat(clone1.getAttribute("height") || "0");
-  const w2 = parseFloat(clone2.getAttribute("width") || "0");
-  const h2 = parseFloat(clone2.getAttribute("height") || "0");
-
-  const width = Math.max(w1, w2);
-  const height = h1 + h2;
-
-  const merged = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  merged.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-  merged.setAttribute("width", String(width));
-  merged.setAttribute("height", String(height));
-  merged.setAttribute("viewBox", `0 0 ${width} ${height}`);
-
-  const g1 = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  Array.from(clone1.childNodes).forEach((node) => g1.appendChild(node));
-  merged.appendChild(g1);
-
-  const g2 = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  Array.from(clone2.childNodes).forEach((node) => g2.appendChild(node));
-  merged.appendChild(g2);
-
-  return merged;
-}
-
-function inlineComputedStyles(node: HTMLElement): HTMLElement {
-  let clone = node.cloneNode(true) as HTMLElement;
-
-  const tmp = document.createElement("div").withStyles({ width: 0, height: 0 });
-  document.body.appendChild(tmp);
-  tmp.appendChild(clone);
-
-  const treeWalker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
-  const cloneWalker = document.createTreeWalker(clone, NodeFilter.SHOW_ELEMENT);
-
-  while (treeWalker.nextNode()) {
-    cloneWalker.nextNode();
-
-    const originalEl = treeWalker.currentNode as HTMLElement;
-    const clonedEl = cloneWalker.currentNode as HTMLElement;
-
-    const computed = window.getComputedStyle(originalEl);
-
-    for (const prop of computed) {
-      clonedEl.style.setProperty(prop, computed.getPropertyValue(prop));
-    }
-  }
-
-  clone = clone.cloneNode(true) as HTMLElement;
-
-  tmp.remove();
-
-  return clone;
-}
 
 document.getElementById("exportSVG").addEventListener("click", (_) => {
-  const connections = document.getElementById("connections") as SVGSVGElement &
-    HTMLElement;
+  const connections = document.getElementById("connections") as unknown as SVGSVGElement;
   const diagramArea = document.getElementById(
     "diagram-objects",
-  ) as HTMLDivElement;
+  ) as unknown as SVGSVGElement;
 
-  async function generateOutput() {
-    const svg1 = inlineComputedStyles(connections) as SVGSVGElement &
-      HTMLElement;
-    const svg2 = await toSvg(diagramArea).then(svgFromDataUrl);
-
-    const svg = mergeSVGsVertical(svg1, svg2);
-
-    const serializer = new XMLSerializer();
-    const source = serializer.serializeToString(svg);
-    download(source, "diagram.svg");
+  function combineSVGs(svg1: SVGSVGElement, svg2: SVGSVGElement): SVGSVGElement {
+    const combined = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    
+    // Calculate bounding box based on entities if available
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    const padding = 50;
+    
+    if (currentDiagram && currentDiagram.entities && currentDiagram.entities.length > 0) {
+      currentDiagram.entities.forEach(entity => {
+        const x = entity.x || 0;
+        const y = entity.y || 0;
+        const width = entity.width || 120;
+        const height = entity.height || 60;
+        
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x + width);
+        maxY = Math.max(maxY, y + height);
+      });
+      
+      // Add padding
+      minX -= padding;
+      minY -= padding;
+      maxX += padding;
+      maxY += padding;
+      
+      // Ensure positive dimensions
+      const width = Math.max(100, maxX - minX);
+      const height = Math.max(100, maxY - minY);
+      
+      combined.setAttribute("width", String(width));
+      combined.setAttribute("height", String(height));
+      combined.setAttribute("viewBox", `${minX} ${minY} ${width} ${height}`);
+    } else {
+      // Fallback to original dimensions
+      const width = parseFloat(svg1.getAttribute("width") || "3000");
+      const height = parseFloat(svg1.getAttribute("height") || "3000");
+      combined.setAttribute("width", String(width));
+      combined.setAttribute("height", String(height));
+      combined.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    }
+    
+    combined.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    
+    // Copy all children from both SVGs
+    Array.from(svg1.childNodes).forEach(child => combined.appendChild(child.cloneNode(true)));
+    Array.from(svg2.childNodes).forEach(child => combined.appendChild(child.cloneNode(true)));
+    
+    return combined;
   }
 
-  generateOutput();
+  const svg = combineSVGs(connections, diagramArea);
+  const serializer = new XMLSerializer();
+  const source = serializer.serializeToString(svg);
+  download(source, "diagram.svg");
 });

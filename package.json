@@ -22,8 +22,7 @@
   "homepage": "https://armagidon-exception.github.io/idef1xgen",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
-    "downloadjs": "^1.4.7",
-    "html-to-image": "^1.11.13"
+    "downloadjs": "^1.4.7"
   },
   "devDependencies": {
     "@types/downloadjs": "^1.4.6",

@@ -3,7 +3,7 @@ export interface Entity {
   primaryKey: Attribute[];
   attributes: Attribute[];
   weak: boolean;
-  div: HTMLElement;
+  div: Element; // Can be HTMLElement or SVGGElement
   x: number;
   y: number;
   width: number;

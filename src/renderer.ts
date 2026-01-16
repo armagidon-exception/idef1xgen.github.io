@@ -1,41 +1,6 @@
-import { toPx, div, span } from "./utils.js";
 import { Entity, Generalization, Relationship } from "./types.js";
-const WEAK_ENTITY_CLASS = "weak-entity";
-const STRONG_ENTITY_CLASS = "strong-entity";
-const ENTITY_NAME_CLASS = "entity-name";
 
-function createEntityBox({ weak, x, y, name }: any) {
-  const container = div()
-    .withStyles({ left: toPx(x), right: toPx(y) })
-    .withClasses(
-      "entity-container",
-      weak ? WEAK_ENTITY_CLASS : STRONG_ENTITY_CLASS,
-    )
-    .withChild(div().withClass(ENTITY_NAME_CLASS).withText(name));
-
-  return container;
-}
-
-function createAttribute({ name, optional, type }: any): HTMLDivElement {
-  return div()
-    .withClasses("attribute", optional ? "optional" : "")
-    .withChild(span().withText(name + (optional ? " (O)" : "")))
-    .withChild(
-      span().withClass("attribute-type").withText(`: ${type}`),
-    ) as HTMLDivElement;
-}
-
-function createPkAttribute({ name, type }: any) {
-  return div()
-    .withClass("pk-attribute")
-    .withChild(document.createElement("span").withClass("pk").withText(name))
-    .withChild(
-      document
-        .createElement("span")
-        .withClass("attribute-type")
-        .withText(` : ${type}`),
-    ) as HTMLDivElement;
-}
+import { createSVGEntity } from "./svgRenderer";
 
 export function renderDiagram({
   entities,
@@ -44,41 +9,16 @@ export function renderDiagram({
 }: any) {
   const diagramArea = document.getElementById(
     "diagram-objects",
-  ) as HTMLDivElement;
-  const connections = document.getElementById("connections") as SVGSVGElement &
-    HTMLElement;
+  ) as unknown as SVGSVGElement;
+  const connections = document.getElementById("connections") as SVGSVGElement & HTMLElement;
 
   diagramArea.innerHTML = "";
   connections.innerHTML = "";
 
   entities.forEach((entity: Entity) => {
-    const entityBox = createEntityBox(entity);
-    const entityContents = div().withClass("entity-box");
-    entityBox.appendChild(entityContents);
-    const pkSection = div().withClass("pk-section");
-    const attrsSection = div().withClass("attributes-section");
-
-    for (const pk of entity.primaryKey) {
-      pkSection.appendChild(createPkAttribute(pk));
-    }
-
-    entityContents.appendChild(pkSection);
-
-    if (entity.primaryKey.length > 0 || entity.attributes.length > 0) {
-      entityContents.appendChild(div().withClass("separator"));
-    }
-
-    for (const attr of entity.attributes) {
-      attrsSection.appendChild(createAttribute(attr));
-    }
-
-    entityContents.appendChild(attrsSection);
-
-    diagramArea.appendChild(entityBox);
-
-    entity.div = entityBox;
-
-    return connections;
+    const svgEntity = createSVGEntity(entity);
+    diagramArea.appendChild(svgEntity);
+    entity.div = svgEntity;
   });
 
   drawConnections({ entities, relationships, generalizations });
@@ -146,7 +86,10 @@ function drawConnections({ entities, relationships }: any) {
       label.setAttribute("y", (pathInfo.mid.y - 12).toString());
       label.setAttribute("text-anchor", "middle");
       label.setAttribute("font-size", "11");
-      label.setAttribute("class", "relationship-center-label");
+      label.setAttribute("fill", "black");
+      label.setAttribute("font-family", '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif');
+      label.setAttribute("font-weight", "500");
+      label.setAttribute("dominant-baseline", "middle");
       label.setAttribute("pointer-events", "none");
       label.textContent =
         rel.source.relName ||
@@ -215,12 +158,13 @@ function drawLine(startPoint: any, endPoint: any, isIdentifying: boolean) {
   }
 
   path.setAttribute("d", d);
-  path.setAttribute(
-    "class",
-    `relationship-line ${isIdentifying ? "identifying-line" : "non-identifying-line"}`,
-  );
+  path.setAttribute("stroke", "black");
+  path.setAttribute("stroke-width", "1.5");
   path.setAttribute("fill", "none");
   path.setAttribute("pointer-events", "none");
+  if (!isIdentifying) {
+    path.setAttribute("stroke-dasharray", "5,3");
+  }
 
   svg.appendChild(path);
 
@@ -256,8 +200,12 @@ function drawRelationshipSymbols(
   const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
   text.setAttribute("x", targetPoint.x + offsetX);
   text.setAttribute("y", targetPoint.y + offsetY);
-  text.setAttribute("class", "cardinality-label");
   text.setAttribute("font-size", "11");
+  text.setAttribute("fill", "black");
+  text.setAttribute("font-family", '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif');
+  text.setAttribute("font-weight", "bold");
+  text.setAttribute("text-anchor", "middle");
+  text.setAttribute("dominant-baseline", "middle");
   text.setAttribute("pointer-events", "none");
   if (!optional && !many) {
     text.textContent = "";
@@ -277,7 +225,7 @@ function drawRelationshipSymbols(
     dot.setAttribute("cx", targetPoint.x);
     dot.setAttribute("cy", targetPoint.y);
     dot.setAttribute("r", (4).toString());
-    dot.setAttribute("class", "cardinality-dot");
+    dot.setAttribute("fill", "black");
     dot.setAttribute("pointer-events", "none");
     svg.appendChild(dot);
     svg.appendChild(text);
@@ -288,11 +236,14 @@ function drawRelationshipSymbols(
       "http://www.w3.org/2000/svg",
       "rect",
     );
-    rhombus.setAttribute("x", sourcePoint.x);
-    rhombus.setAttribute("y", sourcePoint.y);
+    rhombus.setAttribute("x", "-4");
+    rhombus.setAttribute("y", "-4");
     rhombus.setAttribute("width", "8");
     rhombus.setAttribute("height", "8");
-    rhombus.setAttribute("class", "nonidentifying-optional");
+    rhombus.setAttribute("fill", "white");
+    rhombus.setAttribute("stroke", "black");
+    rhombus.setAttribute("stroke-width", "1");
+    rhombus.setAttribute("transform", `translate(${sourcePoint.x}, ${sourcePoint.y}) rotate(45)`);
     svg.appendChild(rhombus);
   }
 }
@@ -327,7 +278,9 @@ function drawGeneralizations({ entities, generalizations }: any) {
     circle.setAttribute("cx", circleCX.toString());
     circle.setAttribute("cy", circleCY.toString());
     circle.setAttribute("r", circleR.toString());
-    circle.setAttribute("class", "generalization-circle");
+    circle.setAttribute("fill", "white");
+    circle.setAttribute("stroke", "black");
+    circle.setAttribute("stroke-width", "2");
     circle.setAttribute("pointer-events", "none");
     svg.appendChild(circle);
 
@@ -376,8 +329,10 @@ function drawGeneralizations({ entities, generalizations }: any) {
       discr.setAttribute("y", (circleCY + 4).toString()); // +4 чтобы текст визуально центрировался
       discr.setAttribute("text-anchor", "start");
       discr.setAttribute("font-size", "11");
+      discr.setAttribute("fill", "black");
+      discr.setAttribute("font-family", '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif');
+      discr.setAttribute("dominant-baseline", "middle");
       discr.setAttribute("pointer-events", "none");
-      discr.setAttribute("class", "generalization-discriminator");
       discr.textContent = gen.discriminator;
       svg.appendChild(discr);
     }
