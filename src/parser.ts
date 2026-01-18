@@ -49,7 +49,7 @@ export function parseMarkup(markup: string): ParseResult {
   }
 
   type State =
-    | (Entity & { type: "entity" })
+    | { type: "entity"; data: Entity }
     | (Relationship & { type: "relationship" })
     | (Generalization & { type: "generalization" });
 
@@ -64,15 +64,17 @@ export function parseMarkup(markup: string): ParseResult {
         }
         state = {
           type: "entity",
-          name: name,
-          primaryKey: [],
-          attributes: [],
-          weak: false,
-          x: 0,
-          y: 0,
-          width: 0,
-          height: 0,
-          div: null,
+          data: new Entity({
+            name: name,
+            primaryKey: [],
+            attributes: [],
+            weak: false,
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0,
+            div: null,
+          }),
         };
       } else if (line.trim().startsWith("Relationship")) {
         let relMatch = line.match(
@@ -103,14 +105,14 @@ export function parseMarkup(markup: string): ParseResult {
       }
     } else if (state.type == "entity") {
       if (line.startsWith("}")) {
-        entities.push(state);
+        entities.push(state.data);
         state = null;
       } else {
         const attr = parseAttribute(line);
         if (!attr) throw new Error("Invalid attribute: " + line);
 
-        if (attr.isPK) state.primaryKey.push(attr);
-        else state.attributes.push(attr);
+        if (attr.isPK) state.data.primaryKey.push(attr);
+        else state.data.attributes.push(attr);
       }
     } else if (state.type == "generalization") {
       if (!line.startsWith("}")) {

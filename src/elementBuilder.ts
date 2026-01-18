@@ -9,7 +9,7 @@ interface HTMLElement {
   withClasses(...clazz: string[]): HTMLElement;
   withText(text: string): HTMLElement;
 }
- 
+
 HTMLElement.prototype.withAttribute = function (qualifiedName, value) {
   if (typeof value === "string") {
     this.setAttribute(qualifiedName, value);

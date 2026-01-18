@@ -3,10 +3,11 @@ export function showStatus(message, type) {
   statusDiv.textContent = message;
   statusDiv.className = `status ${type}`;
   statusDiv.style.display = "block";
-
+  const time = 5000;
+  statusDiv.style.animationDuration = `${time}ms`;
   setTimeout(() => {
     statusDiv.style.display = "none";
-  }, 3000);
+  }, time);
 }
 
 export function toPx(value) {

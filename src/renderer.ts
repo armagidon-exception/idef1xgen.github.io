@@ -1,4 +1,4 @@
-import { Entity, Generalization, Relationship } from "./types.js";
+import { BoundingBox, Entity, Generalization, Relationship } from "./types";
 
 import { createSVGEntity } from "./svgRenderer";
 
@@ -10,7 +10,8 @@ export function renderDiagram({
   const diagramArea = document.getElementById(
     "diagram-objects",
   ) as unknown as SVGSVGElement;
-  const connections = document.getElementById("connections") as SVGSVGElement & HTMLElement;
+  const connections = document.getElementById("connections") as SVGSVGElement &
+    HTMLElement;
 
   diagramArea.innerHTML = "";
   connections.innerHTML = "";
@@ -47,6 +48,10 @@ function drawConnections({ entities, relationships }: any) {
     const sourcePoint = getConnectionPoint(sourceEntity, targetEntity);
     const targetPoint = getConnectionPoint(targetEntity, sourceEntity);
 
+    if (sourcePoint === null || targetPoint === null) {
+      return;
+    }
+
     // Проверяем на NaN значения
     if (
       isNaN(sourcePoint.x) ||
@@ -54,7 +59,9 @@ function drawConnections({ entities, relationships }: any) {
       isNaN(targetPoint.x) ||
       isNaN(targetPoint.y)
     ) {
-      throw new Error("Invalid connection points:" + sourcePoint + targetPoint);
+      throw new Error(
+        `Invalid connection points (${sourcePoint.x}, ${sourcePoint.y}) and (${targetPoint.x}, ${targetPoint.y})`,
+      );
     }
 
     const isIdentifying = targetEntity.primaryKey.some(
@@ -66,9 +73,12 @@ function drawConnections({ entities, relationships }: any) {
 
     const pathInfo = drawLine(sourcePoint, targetPoint, isIdentifying);
 
-    const sourceAttr = sourceEntity.attributes.find(
-      (e) => e.name == rel.source.attributeName,
-    );
+    const sourceAttr = sourceEntity.getAttribute(rel.source.attributeName);
+    if (sourceAttr === undefined || sourceAttr === null) {
+      throw new Error(
+        `Attribute ${rel.source.attributeName} is not found on entity ${sourceEntity.name}`,
+      );
+    }
     drawRelationshipSymbols(
       targetPoint,
       sourcePoint,
@@ -87,7 +97,10 @@ function drawConnections({ entities, relationships }: any) {
       label.setAttribute("text-anchor", "middle");
       label.setAttribute("font-size", "11");
       label.setAttribute("fill", "black");
-      label.setAttribute("font-family", '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif');
+      label.setAttribute(
+        "font-family",
+        '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+      );
       label.setAttribute("font-weight", "500");
       label.setAttribute("dominant-baseline", "middle");
       label.setAttribute("pointer-events", "none");
@@ -99,11 +112,20 @@ function drawConnections({ entities, relationships }: any) {
   });
 }
 
-function getConnectionPoint(fromEntity: Entity, toEntity: Entity) {
+function getConnectionPoint(
+  fromEntity: Entity,
+  toEntity: Entity,
+): { x: number; y: number } | null {
   const fromRect = fromEntity.div.getBoundingClientRect();
   const toRect = toEntity.div.getBoundingClientRect();
   const diagramArea = document.getElementById("diagram-objects");
   const diagramRect = diagramArea.getBoundingClientRect();
+
+  const fromBB = BoundingBox.fromRect(fromRect);
+  const toBB = BoundingBox.fromRect(toRect);
+  if (fromBB.intersects(toBB)) {
+    return null;
+  }
 
   const fromCenterX = fromRect.left + fromRect.width / 2 - diagramRect.left;
   const fromCenterY = fromRect.top + fromRect.height / 2 - diagramRect.top;
@@ -202,7 +224,10 @@ function drawRelationshipSymbols(
   text.setAttribute("y", targetPoint.y + offsetY);
   text.setAttribute("font-size", "11");
   text.setAttribute("fill", "black");
-  text.setAttribute("font-family", '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif');
+  text.setAttribute(
+    "font-family",
+    '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+  );
   text.setAttribute("font-weight", "bold");
   text.setAttribute("text-anchor", "middle");
   text.setAttribute("dominant-baseline", "middle");
@@ -243,7 +268,10 @@ function drawRelationshipSymbols(
     rhombus.setAttribute("fill", "white");
     rhombus.setAttribute("stroke", "black");
     rhombus.setAttribute("stroke-width", "1");
-    rhombus.setAttribute("transform", `translate(${sourcePoint.x}, ${sourcePoint.y}) rotate(45)`);
+    rhombus.setAttribute(
+      "transform",
+      `translate(${sourcePoint.x}, ${sourcePoint.y}) rotate(45)`,
+    );
     svg.appendChild(rhombus);
   }
 }
@@ -330,7 +358,10 @@ function drawGeneralizations({ entities, generalizations }: any) {
       discr.setAttribute("text-anchor", "start");
       discr.setAttribute("font-size", "11");
       discr.setAttribute("fill", "black");
-      discr.setAttribute("font-family", '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif');
+      discr.setAttribute(
+        "font-family",
+        '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+      );
       discr.setAttribute("dominant-baseline", "middle");
       discr.setAttribute("pointer-events", "none");
       discr.textContent = gen.discriminator;

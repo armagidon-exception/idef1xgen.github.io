@@ -15,36 +15,36 @@
         </p>
       </header>
 
-      <div class="main-content">
-        <div class="input-section">
-          <div class="section-title">
-            <h3><i class="fas fa-code"></i> Разметка диаграммы</h3>
-            <button class="btn btn-secondary" onclick="loadExample()">
-              <i class="fas fa-file-code"></i> Пример
-            </button>
-          </div>
+      <section class="input-section">
+        <div class="section-title">
+          <h3><i class="fas fa-code"></i> Разметка диаграммы</h3>
+          <button class="btn btn-secondary" onclick="loadExample()">
+            <i class="fas fa-file-code"></i> Пример
+          </button>
+        </div>
 
-          <div class="code-editor">
-            <textarea
-              id="markup"
-              placeholder="Введите разметку диаграммы здесь..."
-            ></textarea>
-          </div>
+        <div class="code-editor">
+          <textarea
+            id="markup"
+            placeholder="Введите разметку диаграммы здесь..."
+          ></textarea>
+        </div>
 
-          <div class="controls">
-            <button class="btn btn-primary" id="generate-btn">
-              <i class="fas fa-magic"></i> Сгенерировать диаграмму
-            </button>
-            <button class="btn btn-secondary" id="auto-layout-btn">
-              <i class="fas fa-th"></i> Авторазмещение
-            </button>
-          </div>
+        <div class="controls">
+          <button class="btn btn-primary" id="generate-btn">
+            <i class="fas fa-magic"></i> Сгенерировать диаграмму
+          </button>
+          <button class="btn btn-secondary" id="auto-layout-btn">
+            <i class="fas fa-th"></i> Авторазмещение
+          </button>
+        </div>
 
-          <div id="status" class="status"></div>
+        <div id="status" class="status"> 
+        </div>
 
-          <div class="syntax-guide">
-            <h4><i class="fas fa-info-circle"></i> Синтаксис разметки</h4>
-            <pre class="syntax-example">
+        <div class="syntax-guide">
+          <h3><i class="fas fa-info-circle"></i> Синтаксис разметки</h3>
+          <pre class="syntax-example">
 Язык разметки IDEF1X Diagram Generator
 ========================================
 
@@ -57,96 +57,96 @@
 СУЩНОСТИ (Entity)
 -----------------
 Определение сущности:
-  Entity ИмяСущности {
-    атрибуты...
-  }
+Entity ИмяСущности {
+атрибуты...
+}
 
 Пример:
-  Entity Book {
-    +ISBN: string
-    title: string
-    ?year: number
-    category_id: number FK -&gt; Category.id
-  }
+Entity Book {
++ISBN: string
+title: string
+?year: number
+category_id: number FK -&gt; Category.id
+}
 
 АТРИБУТЫ
 --------
 Формат атрибута:
-  [*]?[+?]?имя : тип [FK -&gt; ВнешняяСущность.внешнийАтрибут [: "имяСвязи"]]
+[*]?[+?]?имя : тип [FK -&gt; ВнешняяСущность.внешнийАтрибут [: "имяСвязи"]]
 
 Префиксы:
-  +   - первичный ключ (обязательный)
-  ?   - опциональный (может быть NULL)
-  *   - единичная связь (singular, не many)
-  (отсутствие *) - множественная связь (many)
++   - первичный ключ (обязательный)
+?   - опциональный (может быть NULL)
+*   - единичная связь (singular, не many)
+(отсутствие *) - множественная связь (many)
 
 Тип: произвольная строка (string, number, date, etc.)
 
 Внешний ключ (FK):
-  Указание FK создаёт отношение между сущностями.
-  Можно задать имя связи (необязательно).
+Указание FK создаёт отношение между сущностями.
+Можно задать имя связи (необязательно).
 
 Примеры атрибутов:
-  +id: number                     // первичный ключ
-  ?name: string                   // опциональный атрибут
-  *?phone: string                 // единичный опциональный
-  *email: string                  // единичный обязательный
-  category_id: number FK -&gt; Category.id  // внешний ключ
-  author_id: number FK -&gt; Author.id : "написал"  // с именем связи
++id: number                     // первичный ключ
+?name: string                   // опциональный атрибут
+*?phone: string                 // единичный опциональный
+*email: string                  // единичный обязательный
+category_id: number FK -&gt; Category.id  // внешний ключ
+author_id: number FK -&gt; Author.id : "написал"  // с именем связи
 
 ОТНОШЕНИЯ (Relationship)
 ------------------------
 Отношение можно определить отдельно, если не указано в атрибуте:
-  Relationship Сущность1.атрибут1 -&gt; Сущность2.атрибут2 [: "имяСвязи"]
+Relationship Сущность1.атрибут1 -&gt; Сущность2.атрибут2 [: "имяСвязи"]
 
 Пример:
-  Relationship Book.author_id -&gt; Author.id : "написал"
+Relationship Book.author_id -&gt; Author.id : "написал"
 
 ОБОБЩЕНИЯ (Generalization)
 --------------------------
 Определение наследования (категоризации):
-  Generalization РодительскаяСущность {
-    Подтип1
-    Подтип2
-    ...
-  } complete|partial [discriminator=ИмяДискриминатора]
+Generalization РодительскаяСущность {
+Подтип1
+Подтип2
+...
+} complete|partial [discriminator=ИмяДискриминатора]
 
 Параметры:
-  complete   - полное покрытие (все подтипы перечислены)
-  partial    - неполное покрытие (возможны другие подтипы)
-  discriminator - атрибут-дискриминатор (отображается на диаграмме)
+complete   - полное покрытие (все подтипы перечислены)
+partial    - неполное покрытие (возможны другие подтипы)
+discriminator - атрибут-дискриминатор (отображается на диаграмме)
 
 Пример:
-  Generalization Person {
-    Student
-    Employee
-  } complete discriminator=Role
+Generalization Person {
+Student
+Employee
+} complete discriminator=Role
 
 ПОЛНЫЙ ПРИМЕР
 -------------
 Entity Category {
-  +id: number
-  name: string
++id: number
+name: string
 }
 
 Entity Book {
-  +ISBN: string
-  title: string
-  ?year: number
-  category_id: number FK -&gt; Category.id
++ISBN: string
+title: string
+?year: number
+category_id: number FK -&gt; Category.id
 }
 
 Entity Author {
-  +id: number
-  name: string
-  *?phone: string
++id: number
+name: string
+*?phone: string
 }
 
 Relationship Book.author_id -&gt; Author.id : "написал"
 
 Generalization Person {
-  Student
-  Employee
+Student
+Employee
 } complete discriminator=Role
 
 ПРИМЕЧАНИЯ
@@ -154,29 +154,27 @@ Generalization Person {
 - Сущности автоматически располагаются на диаграмме; можно перетаскивать.
 - На диаграмме отображаются кардинальности (P - many, Z - optional).
 - Экспорт в SVG доступен через кнопку Export SVG.
-            </pre>
-          </div>
+                    </pre
+          >
         </div>
+      </section>
 
-        <div class="output-section">
-          <div class="section-title">
-            <h3><i class="fas fa-eye"></i> Визуализация</h3>
-            <button id="exportSVG" class="btn btn-secondary">Export SVG</button>
-            <div class="zoom-controls">
-              <button class="zoom-btn" onclick="zoomOut()">-</button>
-              <button class="zoom-btn" onclick="resetZoom()">100%</button>
-              <button class="zoom-btn" onclick="zoomIn()">+</button>
-              <div class="zoom-level" id="zoom-level">100%</div>
-            </div>
+      <div class="output-section">
+        <div class="section-title">
+          <h3><i class="fas fa-eye"></i> Визуализация</h3>
+          <button id="exportSVG" class="btn btn-secondary">Export SVG</button>
+        </div>
+        <div class="diagram-area">
+          <div class="zoom-controls">
+            <button class="zoom-btn" onclick="zoomOut()">-</button>
+            <button class="zoom-btn" onclick="resetZoom()">100%</button>
+            <button class="zoom-btn" onclick="zoomIn()">+</button>
+            <div class="zoom-level" id="zoom-level">100%</div>
           </div>
-
           <div class="diagram-container" id="diagram-container">
             <svg
               id="diagram-objects"
               style="
-                position: absolute;
-                top: 0;
-                left: 0;
                 width: 3000px;
                 height: 3000px;
                 pointer-events: auto;
@@ -186,9 +184,6 @@ Generalization Person {
             <svg
               id="connections"
               style="
-                position: absolute;
-                top: 0;
-                left: 0;
                 width: 3000px;
                 height: 3000px;
                 pointer-events: none;

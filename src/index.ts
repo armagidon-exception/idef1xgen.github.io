@@ -98,8 +98,14 @@ function makeDraggable(element: Element, entity: Entity) {
     // Highlight the entity rectangle for dragging feedback
     const svgRect = element.querySelector("rect");
     if (svgRect) {
-      svgRect.setAttribute("original-stroke", svgRect.getAttribute("stroke") || "black");
-      svgRect.setAttribute("original-stroke-width", svgRect.getAttribute("stroke-width") || "2");
+      svgRect.setAttribute(
+        "original-stroke",
+        svgRect.getAttribute("stroke") || "black",
+      );
+      svgRect.setAttribute(
+        "original-stroke-width",
+        svgRect.getAttribute("stroke-width") || "2",
+      );
       svgRect.setAttribute("stroke", "#667eea");
       svgRect.setAttribute("stroke-width", "3");
     }
@@ -153,7 +159,7 @@ function makeDraggable(element: Element, entity: Entity) {
         svgRect.removeAttribute("original-stroke-width");
       }
     }
-    
+
     isDragging = false;
     currentEntity = null;
 
@@ -240,44 +246,57 @@ Generalization Person {
   showStatus('Пример загружен. Нажмите "Сгенерировать диаграмму"', "success");
 };
 
-
-
 document.getElementById("exportSVG").addEventListener("click", (_) => {
-  const connections = document.getElementById("connections") as unknown as SVGSVGElement;
+  const connections = document.getElementById(
+    "connections",
+  ) as unknown as SVGSVGElement;
   const diagramArea = document.getElementById(
     "diagram-objects",
   ) as unknown as SVGSVGElement;
 
-  function combineSVGs(svg1: SVGSVGElement, svg2: SVGSVGElement): SVGSVGElement {
-    const combined = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    
+  function combineSVGs(
+    svg1: SVGSVGElement,
+    svg2: SVGSVGElement,
+  ): SVGSVGElement {
+    const combined = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "svg",
+    );
+
     // Calculate bounding box based on entities if available
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
     const padding = 50;
-    
-    if (currentDiagram && currentDiagram.entities && currentDiagram.entities.length > 0) {
-      currentDiagram.entities.forEach(entity => {
+
+    if (
+      currentDiagram &&
+      currentDiagram.entities &&
+      currentDiagram.entities.length > 0
+    ) {
+      currentDiagram.entities.forEach((entity) => {
         const x = entity.x || 0;
         const y = entity.y || 0;
         const width = entity.width || 120;
         const height = entity.height || 60;
-        
+
         minX = Math.min(minX, x);
         minY = Math.min(minY, y);
         maxX = Math.max(maxX, x + width);
         maxY = Math.max(maxY, y + height);
       });
-      
+
       // Add padding
       minX -= padding;
       minY -= padding;
       maxX += padding;
       maxY += padding;
-      
+
       // Ensure positive dimensions
       const width = Math.max(100, maxX - minX);
       const height = Math.max(100, maxY - minY);
-      
+
       combined.setAttribute("width", String(width));
       combined.setAttribute("height", String(height));
       combined.setAttribute("viewBox", `${minX} ${minY} ${width} ${height}`);
@@ -289,13 +308,17 @@ document.getElementById("exportSVG").addEventListener("click", (_) => {
       combined.setAttribute("height", String(height));
       combined.setAttribute("viewBox", `0 0 ${width} ${height}`);
     }
-    
+
     combined.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    
+
     // Copy all children from both SVGs
-    Array.from(svg1.childNodes).forEach(child => combined.appendChild(child.cloneNode(true)));
-    Array.from(svg2.childNodes).forEach(child => combined.appendChild(child.cloneNode(true)));
-    
+    Array.from(svg1.childNodes).forEach((child) =>
+      combined.appendChild(child.cloneNode(true)),
+    );
+    Array.from(svg2.childNodes).forEach((child) =>
+      combined.appendChild(child.cloneNode(true)),
+    );
+
     return combined;
   }
 
